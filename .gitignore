@@ -1,0 +1,17 @@
+target/
+*.class
+*.jar
+*.war
+
+.idea/
+*.iml
+.vscode/
+
+.env
+*.env
+
+node_modules/
+dist/
+
+application-local.yml
+application-local.properties
