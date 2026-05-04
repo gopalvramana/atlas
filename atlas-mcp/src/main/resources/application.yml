@@ -1,0 +1,36 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/atlas}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  main:
+    web-application-type: none   # MCP server runs over stdio, not HTTP
+
+spring-ai:
+  anthropic:
+    api-key: ${ANTHROPIC_API_KEY:}
+  openai:
+    api-key: ${OPENAI_API_KEY:}
+    embedding:
+      options:
+        model: text-embedding-3-small
+  mcp:
+    server:
+      name: atlas
+      version: 0.1.0
+      transport: stdio
+
+atlas:
+  retrieval:
+    top-k: 5
+    rrf-k: 60
+  agent:
+    tool-model: claude-haiku-4-5
+    answer-model: claude-sonnet-4-5

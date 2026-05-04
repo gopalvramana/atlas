@@ -1,0 +1,30 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/atlas}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  main:
+    web-application-type: none   # CLI runner — no web server needed
+
+spring-ai:
+  openai:
+    api-key: ${OPENAI_API_KEY:}
+    embedding:
+      options:
+        model: text-embedding-3-small
+
+atlas:
+  ingestion:
+    chunk-size: 512        # tokens per chunk
+    chunk-overlap: 64      # token overlap between chunks
+    batch-size: 100        # chunks per embedding API call
+    spring-ai:
+      github-repo: spring-projects/spring-ai
+      docs-url: https://docs.spring.io/spring-ai/reference/
