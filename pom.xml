@@ -36,6 +36,7 @@
         <java.version>21</java.version>
         <spring-ai.version>1.0.0</spring-ai.version>
         <dotenv-java.version>3.0.0</dotenv-java.version>
+        <jtokkit.version>1.1.0</jtokkit.version>
     </properties>
 
     <dependencyManagement>
@@ -54,6 +55,13 @@
                 <groupId>io.github.cdimascio</groupId>
                 <artifactId>dotenv-java</artifactId>
                 <version>${dotenv-java.version}</version>
+            </dependency>
+
+            <!-- jtokkit — accurate OpenAI-compatible token counting (cl100k_base) -->
+            <dependency>
+                <groupId>com.knuddels</groupId>
+                <artifactId>jtokkit</artifactId>
+                <version>${jtokkit.version}</version>
             </dependency>
 
             <!-- Internal modules -->

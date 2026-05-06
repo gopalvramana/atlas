@@ -35,6 +35,12 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
+        <!-- jtokkit — accurate token counting using cl100k_base (same as text-embedding-3-small) -->
+        <dependency>
+            <groupId>com.knuddels</groupId>
+            <artifactId>jtokkit</artifactId>
+        </dependency>
+
         <!-- Spring AI: OpenAI for embeddings (text-embedding-3-small) -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
@@ -67,7 +73,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.atlas.ingestion.IngestionCli</mainClass>
+                    <mainClass>com.atlas.IngestionCli</mainClass>
                 </configuration>
             </plugin>
         </plugins>
