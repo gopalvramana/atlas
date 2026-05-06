@@ -12,7 +12,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.gopalvramana.atlas</groupId>
+    <groupId>com.atlas</groupId>
     <artifactId>atlas-parent</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -58,17 +58,17 @@
 
             <!-- Internal modules -->
             <dependency>
-                <groupId>com.gopalvramana.atlas</groupId>
+                <groupId>com.atlas</groupId>
                 <artifactId>atlas-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.gopalvramana.atlas</groupId>
+                <groupId>com.atlas</groupId>
                 <artifactId>atlas-retrieval</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.gopalvramana.atlas</groupId>
+                <groupId>com.atlas</groupId>
                 <artifactId>atlas-agent</artifactId>
                 <version>${project.version}</version>
             </dependency>

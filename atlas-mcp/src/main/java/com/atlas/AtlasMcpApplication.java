@@ -1,4 +1,4 @@
-package com.gopalvramana.atlas;
+package com.atlas;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import io.github.cdimascio.dotenv.DotenvException;
@@ -6,11 +6,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class AtlasApiApplication {
+public class AtlasMcpApplication {
 
     public static void main(String[] args) {
         loadDotenv();
-        SpringApplication.run(AtlasApiApplication.class, args);
+        SpringApplication.run(AtlasMcpApplication.class, args);
     }
 
     private static void loadDotenv() {
@@ -24,7 +24,7 @@ public class AtlasApiApplication {
                 }
             });
         } catch (DotenvException ex) {
-            // .env not present — rely on environment variables (production behaviour)
+            // .env not present — rely on environment variables
         }
     }
 }

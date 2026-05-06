@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.gopalvramana.atlas</groupId>
+        <groupId>com.atlas</groupId>
         <artifactId>atlas-parent</artifactId>
         <version>0.1.0-SNAPSHOT</version>
     </parent>
@@ -21,11 +21,11 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.gopalvramana.atlas</groupId>
+            <groupId>com.atlas</groupId>
             <artifactId>atlas-core</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.gopalvramana.atlas</groupId>
+            <groupId>com.atlas</groupId>
             <artifactId>atlas-retrieval</artifactId>
         </dependency>
 

@@ -1,4 +1,4 @@
-package com.gopalvramana.atlas;
+package com.atlas;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import io.github.cdimascio.dotenv.DotenvException;
