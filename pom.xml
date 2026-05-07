@@ -34,7 +34,8 @@
 
     <properties>
         <java.version>21</java.version>
-        <spring-ai.version>1.0.0</spring-ai.version>
+        <spring-ai.version>1.1.5</spring-ai.version>
+        <exec-maven-plugin.version>3.5.0</exec-maven-plugin.version>
         <dotenv-java.version>3.0.0</dotenv-java.version>
         <jtokkit.version>1.1.0</jtokkit.version>
     </properties>

@@ -44,7 +44,7 @@
         <!-- Spring AI: OpenAI for embeddings (text-embedding-3-small) -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
+            <artifactId>spring-ai-starter-model-openai</artifactId>
         </dependency>
 
         <!-- PostgreSQL driver -->
@@ -72,6 +72,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
+                <version>${exec-maven-plugin.version}</version>
                 <configuration>
                     <mainClass>com.atlas.IngestionCli</mainClass>
                 </configuration>

@@ -31,10 +31,10 @@
             <artifactId>dotenv-java</artifactId>
         </dependency>
 
-        <!-- Spring AI MCP server support -->
+        <!-- Spring AI MCP server (stdio transport) -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-mcp-server-spring-boot-starter</artifactId>
+            <artifactId>spring-ai-starter-mcp-server</artifactId>
         </dependency>
 
         <dependency>
