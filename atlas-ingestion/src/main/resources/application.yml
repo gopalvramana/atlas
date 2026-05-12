@@ -12,6 +12,10 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   main:
     web-application-type: none   # CLI runner — no web server needed
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    validate-on-migrate: true
 
 spring-ai:
   openai:

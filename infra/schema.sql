@@ -1,5 +1,8 @@
--- Atlas database schema
--- Apply once on first run; docker-compose mounts this as init script.
+-- Atlas database schema — REFERENCE ONLY
+-- Schema is managed by Flyway. See:
+--   atlas-ingestion/src/main/resources/db/migration/
+--   atlas-api/src/main/resources/db/migration/
+-- Do not apply this file manually.
 
 CREATE EXTENSION IF NOT EXISTS vector;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;  -- supports BM25-style trigram indexes
