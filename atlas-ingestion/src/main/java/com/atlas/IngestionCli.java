@@ -1,5 +1,10 @@
 package com.atlas;
 
+import com.atlas.core.Chunk;
+import com.atlas.core.ChunkSource;
+import com.atlas.core.Version;
+import com.atlas.ingestion.adapter.AsciiDocAdapter;
+import com.atlas.ingestion.chunking.ChunkingService;
 import com.atlas.ingestion.config.GitHubConfig;
 import com.atlas.ingestion.fetcher.FetchedDocument;
 import com.atlas.ingestion.fetcher.GitHubDocsFetcher;
@@ -24,10 +29,15 @@ public class IngestionCli implements ApplicationRunner {
     private static final Logger log = LoggerFactory.getLogger(IngestionCli.class);
 
     private final GitHubDocsFetcher fetcher;
+    private final AsciiDocAdapter asciiDocAdapter;
+    private final ChunkingService chunkingService;
     private final GitHubConfig config;
 
-    public IngestionCli(GitHubDocsFetcher fetcher, GitHubConfig config) {
+    public IngestionCli(GitHubDocsFetcher fetcher, AsciiDocAdapter asciiDocAdapter,
+                        ChunkingService chunkingService, GitHubConfig config) {
         this.fetcher = fetcher;
+        this.asciiDocAdapter = asciiDocAdapter;
+        this.chunkingService = chunkingService;
         this.config = config;
     }
 
@@ -38,20 +48,41 @@ public class IngestionCli implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        log.info("=== Atlas Ingestion — Fetch Test ===");
+        log.info("=== Atlas Ingestion — Fetch + Extract + Chunk Test ===");
 
-        for (GitHubConfig.VersionConfig version : config.getVersions()) {
-            log.info("Fetching version: {} (branch: {})", version.getLabel(), version.getBranch());
+        for (GitHubConfig.VersionConfig versionConfig : config.getVersions()) {
+            Version version = Version.fromLabel(versionConfig.getLabel());
+            log.info("Processing version: {} (branch: {})", version.getLabel(), version.getBranch());
 
             List<FetchedDocument> documents = fetcher.fetch(version.getBranch());
+            log.info("Fetched {} files", documents.size());
 
-            log.info("Version: {} — {} files fetched", version.getLabel(), documents.size());
-            documents.forEach(doc ->
-                log.info("  ✓ {} — {}", doc.filename(), doc.url())
-            );
+            int totalChunks = 0;
+
+            for (FetchedDocument doc : documents) {
+                // Step 2 — Extract: .adoc → plain text
+                String plainText = asciiDocAdapter.extractText(doc.rawContent(), doc.url());
+
+                // document hash — SHA-256 of raw .adoc (before extraction)
+                String documentHash = ChunkingService.sha256(doc.rawContent());
+
+                // section — filename without extension
+                String section = doc.filename().replace(".adoc", "");
+
+                // Step 3 — Chunk: plain text → List<Chunk>
+                List<Chunk> chunks = chunkingService.chunk(
+                        plainText, ChunkSource.SPRING_AI_GITHUB,
+                        version, section, doc.url(), documentHash
+                );
+
+                totalChunks += chunks.size();
+                log.info("  ✓ {} → {} chunks", doc.filename(), chunks.size());
+            }
+
+            log.info("Version: {} — {} files → {} total chunks", version.getLabel(), documents.size(), totalChunks);
         }
 
-        log.info("=== Fetch complete ===");
+        log.info("=== Chunk test complete ===");
     }
 
     private static void loadDotenv() {
