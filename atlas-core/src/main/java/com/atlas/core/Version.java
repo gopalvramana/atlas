@@ -2,9 +2,9 @@ package com.atlas.core;
 
 public enum Version {
 
-    V_0_8("0.8", "0.8.x"),
     V_1_0_GA("1.0-GA", "1.0.x"),
-    V_1_1_PLUS("1.1+", "1.1.x");
+    V_1_1("1.1", "1.1.x"),
+    V_2_0_M("2.0-M", "main");
 
     private final String label;   // used in queries, responses, and DB storage
     private final String branch;  // GitHub branch name used during ingestion
