@@ -6,6 +6,22 @@ Full engineering guidelines: [`docs/guidelines.md`](docs/guidelines.md)
 
 ---
 
+## Session Start — Read These First
+
+Before touching any code at the start of a session:
+1. Read [`docs/progress.md`](docs/progress.md) — know exactly where we are
+2. Read [`docs/decisions.md`](docs/decisions.md) — recover all prior decisions
+
+## Commit Rule — Always Update These
+
+At every commit checkpoint, update in the same commit:
+- [`docs/progress.md`](docs/progress.md) — mark completed items ✅, update next steps
+- [`docs/decisions.md`](docs/decisions.md) — append any new ADRs made since last commit
+
+Mid-session critical decisions → use `/remember` immediately.
+
+---
+
 ## Technology Stack
 
 | Concern | Choice |
