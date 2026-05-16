@@ -47,10 +47,13 @@ flowchart TD
     end
 
     subgraph STORE ["💾 Step 5 — Store"]
-        N[ChunkRepository\nINSERT INTO chunks]:::store
-        O{content_hash\nalready exists?}:::decision
-        P[Skip — ON CONFLICT\nDO NOTHING]:::store
-        Q[Insert new chunk\nwith embedding]:::store
+        N{document_hash\nchanged?}:::decision
+        NA[Skip file —\nall chunks unchanged]:::store
+        NB[DELETE old chunks\nfor url + version]:::store
+        NC[ChunkRepository\nINSERT INTO chunks]:::store
+        ND{content_hash\nalready exists?}:::decision
+        NE[Skip — ON CONFLICT\nDO NOTHING]:::store
+        NF[Insert new chunk\nwith embedding]:::store
     end
 
     subgraph RECORD ["📊 Step 6 — Record"]
@@ -72,11 +75,15 @@ flowchart TD
     L --> J
     K -- No --> M
     M --> N
-    N --> O
-    O -- Yes --> P
-    O -- No --> Q
-    P --> R
-    Q --> R
+    N -- Unchanged --> NA
+    N -- Changed --> NB
+    NB --> NC
+    NC --> ND
+    ND -- Yes --> NE
+    ND -- No --> NF
+    NA --> R
+    NE --> R
+    NF --> R
     R --> S
     S --> B
 ```
@@ -163,12 +170,18 @@ Generates a 1536-dimensional vector for each chunk using OpenAI `text-embedding-
 
 **Class:** `ChunkRepository`
 
-Persists each chunk to the `chunks` table using `ON CONFLICT (content_hash) DO NOTHING`:
+Two-level idempotency:
 
-- If `content_hash` already exists → chunk is skipped (already ingested)
-- If `content_hash` is new → chunk is inserted with its embedding
+**Document level (`document_hash`):**
+- `document_hash` = SHA-256 of the full source `.adoc` file content
+- If `document_hash` is unchanged → skip the entire file (all chunks are identical)
+- If `document_hash` changed → DELETE all existing chunks for that `url + version`, then re-chunk, re-embed, and insert fresh chunks
 
-This makes every run idempotent. Re-running after a doc update only writes new or changed chunks.
+**Chunk level (`content_hash`):**
+- Persists each chunk using `ON CONFLICT (content_hash) DO NOTHING`
+- Guards against partial re-runs and duplicate inserts
+
+This two-level strategy ensures stale chunks never accumulate when a document is updated.
 
 ---
 
@@ -201,6 +214,8 @@ Writes one row to `ingestion_runs` per version processed:
 | GitHub API failure (HTTP 5xx) | Retry up to 3 times, then fail the run |
 | OpenAI rate limit (HTTP 429) | Exponential backoff, retry up to 3 times |
 | OpenAI failure | Retry up to 3 times, then fail the run |
+| `document_hash` unchanged | Skip entire file — all chunks already in DB |
+| `document_hash` changed | DELETE old chunks for url+version, re-chunk and re-embed |
 | `content_hash` conflict | Skip silently — `ON CONFLICT DO NOTHING` |
 | Run fails mid-way | Already-inserted chunks remain. Next run skips them and continues naturally |
 
