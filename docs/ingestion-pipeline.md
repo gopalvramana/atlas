@@ -143,7 +143,8 @@ Each chunk is tagged with:
 - `version` — e.g. `1.0-GA`
 - `section` — derived from filename e.g. `chatclient`
 - `url` — GitHub `html_url` of the source file
-- `contentHash` — SHA-256 of chunk text (used for idempotent upsert)
+- `contentHash` — SHA-256 of chunk text (chunk-level duplicate guard)
+- `documentHash` — SHA-256 of the full source document (document-level idempotency; same value on every chunk from the same file)
 
 ---
 
@@ -162,8 +163,6 @@ Generates a 1536-dimensional vector for each chunk using OpenAI `text-embedding-
 ### Step 5 — Store
 
 **Class:** `ChunkRepository`
-
-Two-level idempotency:
 
 Decision is made at the **document level** using `document_hash` (SHA-256 of the full `.adoc` file):
 
@@ -192,7 +191,7 @@ Writes one row to `ingestion_runs` per version processed:
 | `files_fetched` | total files retrieved from GitHub |
 | `chunks_produced` | total chunks after splitting |
 | `chunks_inserted` | new chunks written to DB |
-| `chunks_skipped` | chunks already in DB, skipped |
+| `chunks_skipped` | files skipped because document_hash was unchanged |
 | `duration_ms` | total time for this version |
 | `status` | `SUCCESS` or `FAILED` |
 | `error_message` | populated if `FAILED` |
@@ -207,10 +206,9 @@ Writes one row to `ingestion_runs` per version processed:
 | GitHub API failure (HTTP 5xx) | Retry up to 3 times, then fail the run |
 | OpenAI rate limit (HTTP 429) | Exponential backoff, retry up to 3 times |
 | OpenAI failure | Retry up to 3 times, then fail the run |
-| `document_hash` unchanged | Skip entire file — all chunks already in DB |
-| `document_hash` changed | DELETE old chunks for url+version, re-chunk and re-embed |
-| `content_hash` conflict | Skip silently — `ON CONFLICT DO NOTHING` |
-| Run fails mid-way | Already-inserted chunks remain. Next run skips them and continues naturally |
+| `document_hash` unchanged | Skip entire file — document not modified since last run |
+| `document_hash` changed | DELETE old chunks for url+version, re-chunk, re-embed, insert fresh |
+| Run fails mid-way | Already-inserted chunks remain. Next run sees document_hash changed, deletes partial chunks, and reprocesses cleanly |
 
 ---
 
@@ -250,12 +248,10 @@ atlas:
 ## Running the pipeline
 
 ```bash
-# Set environment variables (or use .env file)
-export GITHUB_TOKEN=your_token
-export OPENAI_API_KEY=your_key
-export DB_URL=jdbc:postgresql://localhost:5432/atlas
-export DB_USERNAME=roms_user
-export DB_PASSWORD=roms_pass
+# Copy .env.example to .env and fill in your values
+# .env is loaded automatically via dotenv-java at startup — no export needed
+cp .env.example .env
+# edit .env: set GITHUB_TOKEN, OPENAI_API_KEY, DB_URL, DB_USERNAME, DB_PASSWORD
 
 # Run ingestion
 mvn exec:java -pl atlas-ingestion
