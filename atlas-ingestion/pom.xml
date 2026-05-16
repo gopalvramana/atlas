@@ -97,6 +97,7 @@
                 <version>${exec-maven-plugin.version}</version>
                 <configuration>
                     <mainClass>com.atlas.IngestionCli</mainClass>
+                    <workingDirectory>${maven.multiModuleProjectDirectory}</workingDirectory>
                 </configuration>
             </plugin>
         </plugins>
