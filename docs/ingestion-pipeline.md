@@ -50,10 +50,7 @@ flowchart TD
         N{document_hash\nchanged?}:::decision
         NA[Skip file —\nall chunks unchanged]:::store
         NB[DELETE old chunks\nfor url + version]:::store
-        NC[ChunkRepository\nINSERT INTO chunks]:::store
-        ND{content_hash\nalready exists?}:::decision
-        NE[Skip — ON CONFLICT\nDO NOTHING]:::store
-        NF[Insert new chunk\nwith embedding]:::store
+        NC[ChunkRepository\nINSERT chunks\nON CONFLICT DO NOTHING]:::store
     end
 
     subgraph RECORD ["📊 Step 6 — Record"]
@@ -78,12 +75,8 @@ flowchart TD
     N -- Unchanged --> NA
     N -- Changed --> NB
     NB --> NC
-    NC --> ND
-    ND -- Yes --> NE
-    ND -- No --> NF
     NA --> R
-    NE --> R
-    NF --> R
+    NC --> R
     R --> S
     S --> B
 ```
@@ -172,16 +165,16 @@ Generates a 1536-dimensional vector for each chunk using OpenAI `text-embedding-
 
 Two-level idempotency:
 
-**Document level (`document_hash`):**
-- `document_hash` = SHA-256 of the full source `.adoc` file content
-- If `document_hash` is unchanged → skip the entire file (all chunks are identical)
-- If `document_hash` changed → DELETE all existing chunks for that `url + version`, then re-chunk, re-embed, and insert fresh chunks
+Decision is made at the **document level** using `document_hash` (SHA-256 of the full `.adoc` file):
 
-**Chunk level (`content_hash`):**
-- Persists each chunk using `ON CONFLICT (content_hash) DO NOTHING`
-- Guards against partial re-runs and duplicate inserts
+| `document_hash` | Action |
+|---|---|
+| Unchanged | Skip entire file — all chunks are identical, nothing to do |
+| Changed | DELETE all chunks for `url + version`, re-chunk, re-embed, INSERT fresh chunks |
 
-This two-level strategy ensures stale chunks never accumulate when a document is updated.
+`ON CONFLICT (content_hash) DO NOTHING` is a silent DB safety net against concurrent duplicate inserts — not a flow decision.
+
+This ensures stale chunks never accumulate when a document is updated.
 
 ---
 
