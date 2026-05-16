@@ -26,9 +26,27 @@ spring-ai:
 
 atlas:
   ingestion:
-    chunk-size: 512        # tokens per chunk
-    chunk-overlap: 64      # token overlap between chunks
-    batch-size: 100        # chunks per embedding API call
-    spring-ai:
-      github-repo: spring-projects/spring-ai
-      docs-url: https://docs.spring.io/spring-ai/reference/
+    chunk-size: 512       # tokens per chunk
+    chunk-overlap: 64     # token overlap between chunks
+    batch-size: 100       # chunks per OpenAI embedding API call
+    github:
+      owner: spring-projects
+      repo: spring-ai
+      docs-path: spring-ai-docs/src/main/antora/modules/ROOT/pages
+      token: ${GITHUB_TOKEN:}   # personal access token — set in .env
+      versions:
+        - label: "0.8"
+          branch: "0.8.x"
+        - label: "1.0-GA"
+          branch: "1.0.x"
+        - label: "1.1+"
+          branch: "1.1.x"
+      include-paths:            # subdirectories and files to ingest
+        - api
+        - guides
+        - concepts.adoc
+        - getting-started.adoc
+        - upgrade-notes.adoc
+      exclude-files:            # files to skip even if inside included paths
+        - contribution-guidelines.adoc
+        - index.adoc

@@ -45,6 +45,18 @@
             <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
 
+        <!-- AsciidoctorJ — converts .adoc to HTML for text extraction -->
+        <dependency>
+            <groupId>org.asciidoctor</groupId>
+            <artifactId>asciidoctorj</artifactId>
+        </dependency>
+
+        <!-- Jsoup — strips HTML tags to produce clean plain text -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+        </dependency>
+
         <!-- jtokkit — accurate token counting using cl100k_base (same as text-embedding-3-small) -->
         <dependency>
             <groupId>com.knuddels</groupId>

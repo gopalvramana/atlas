@@ -15,9 +15,7 @@ public class IngestionCli {
 
     private static void loadDotenv() {
         try {
-            Dotenv dotenv = Dotenv.configure()
-                    .ignoreIfMissing()
-                    .load();
+            Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
             dotenv.entries().forEach(e -> {
                 if (System.getenv(e.getKey()) == null) {
                     System.setProperty(e.getKey(), e.getValue());

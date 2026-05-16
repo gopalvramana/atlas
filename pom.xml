@@ -38,6 +38,8 @@
         <exec-maven-plugin.version>3.5.0</exec-maven-plugin.version>
         <dotenv-java.version>3.0.0</dotenv-java.version>
         <jtokkit.version>1.1.0</jtokkit.version>
+        <asciidoctorj.version>3.0.1</asciidoctorj.version>
+        <jsoup.version>1.22.2</jsoup.version>
     </properties>
 
     <dependencyManagement>
@@ -56,6 +58,20 @@
                 <groupId>io.github.cdimascio</groupId>
                 <artifactId>dotenv-java</artifactId>
                 <version>${dotenv-java.version}</version>
+            </dependency>
+
+            <!-- AsciidoctorJ — AsciiDoc to HTML conversion -->
+            <dependency>
+                <groupId>org.asciidoctor</groupId>
+                <artifactId>asciidoctorj</artifactId>
+                <version>${asciidoctorj.version}</version>
+            </dependency>
+
+            <!-- Jsoup — HTML to plain text extraction -->
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>${jsoup.version}</version>
             </dependency>
 
             <!-- jtokkit — accurate OpenAI-compatible token counting (cl100k_base) -->
