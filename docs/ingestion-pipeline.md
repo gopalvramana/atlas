@@ -21,7 +21,7 @@ flowchart TD
     classDef record fill:#64748b,stroke:#475569,color:#fff,font-weight:bold
 
     A([🚀 IngestionCli\nEntry Point]):::entry
-    B[/For each version\n0.8 · 1.0-GA · 1.1+/]:::decision
+    B[/For each version\n1.0-GA · 1.1 · 2.0-M/]:::decision
 
     subgraph FETCH ["📥 Step 1 — Fetch"]
         C[GitHubDocsFetcher\nList include-paths via Contents API]:::fetch
@@ -226,12 +226,12 @@ atlas:
       docs-path: spring-ai-docs/src/main/antora/modules/ROOT/pages
       token: ${GITHUB_TOKEN}  # personal access token — 5,000 requests/hour
       versions:
-        - label: "0.8"
-          branch: "0.8.x"
         - label: "1.0-GA"
           branch: "1.0.x"
-        - label: "1.1+"
+        - label: "1.1"
           branch: "1.1.x"
+        - label: "2.0-M"
+          branch: "main"
       include-paths:
         - api
         - guides
