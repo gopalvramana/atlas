@@ -47,9 +47,9 @@ Read this at the start of every session to know exactly where we are.
 
 | Class | Responsibility |
 |---|---|
-| `FetchedDocument` | Value object — filename, url, rawContent |
-| `GitHubConfig` | `@ConfigurationProperties` binding for `atlas.ingestion.github.*` |
-| `GitHubDocsFetcher` | Fetch raw .adoc files from GitHub API for each version |
+| ~~`FetchedDocument`~~ ✅ | Value object — filename, url, rawContent |
+| ~~`GitHubConfig`~~ ✅ | `@ConfigurationProperties` binding for `atlas.ingestion.github.*` |
+| ~~`GitHubDocsFetcher`~~ ✅ | Fetch raw .adoc files from GitHub API for each version |
 | `ChunkingService` | Split plain text → overlapping token windows + hashes |
 | `EmbeddingService` | Batch chunks → OpenAI embeddings with retry |
 | `ChunkEntity` | JPA entity for `chunks` table |

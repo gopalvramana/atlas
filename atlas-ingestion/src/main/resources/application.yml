@@ -1,4 +1,12 @@
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioSpeechAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiAudioTranscriptionAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiChatAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiImageAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiModerationAutoConfiguration
+      - org.springframework.ai.model.openai.autoconfigure.OpenAiEmbeddingAutoConfiguration
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/atlas}
     username: ${DB_USERNAME:postgres}
@@ -19,7 +27,7 @@ spring:
 
 spring-ai:
   openai:
-    api-key: ${OPENAI_API_KEY:}
+    api-key: ${OPENAI_API_KEY:dummy}   # real key needed only when EmbeddingService runs
     embedding:
       options:
         model: text-embedding-3-small
