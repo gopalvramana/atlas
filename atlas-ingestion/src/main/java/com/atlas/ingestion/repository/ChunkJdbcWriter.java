@@ -31,7 +31,7 @@ public class ChunkJdbcWriter {
                 (id, source, version, section, url, content, content_hash, document_hash, embedding, ingested_at)
             VALUES
                 (?::uuid, ?, ?, ?, ?, ?, ?, ?, ?::vector, ?)
-            ON CONFLICT (content_hash) DO NOTHING
+            ON CONFLICT (content_hash, version) DO NOTHING
             """;
 
     private final JdbcTemplate jdbc;
