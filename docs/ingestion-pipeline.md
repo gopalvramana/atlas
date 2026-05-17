@@ -50,7 +50,7 @@ flowchart TD
         N{document_hash\nchanged?}:::decision
         NA[Skip file —\nall chunks unchanged]:::store
         NB[DELETE old chunks\nfor url + version]:::store
-        NC[ChunkRepository\nINSERT chunks\nON CONFLICT DO NOTHING]:::store
+        NC[ChunkJdbcWriter\nINSERT chunks\nON CONFLICT (content_hash, version) DO NOTHING]:::store
     end
 
     subgraph RECORD ["📊 Step 6 — Record"]
@@ -162,7 +162,7 @@ Generates a 1536-dimensional vector for each chunk using OpenAI `text-embedding-
 
 ### Step 5 — Store
 
-**Class:** `ChunkRepository`
+**Classes:** `IngestionService` · `ChunkRepository` · `ChunkJdbcWriter`
 
 Decision is made at the **document level** using `document_hash` (SHA-256 of the full `.adoc` file):
 
@@ -170,10 +170,16 @@ Decision is made at the **document level** using `document_hash` (SHA-256 of the
 |---|---|
 | Unchanged | Skip entire file — all chunks are identical, nothing to do |
 | Changed | DELETE all chunks for `url + version`, re-chunk, re-embed, INSERT fresh chunks |
+| Not found | First time seeing this file — chunk, embed, insert |
 
-`ON CONFLICT (content_hash) DO NOTHING` is a silent DB safety net against concurrent duplicate inserts — not a flow decision.
+`ON CONFLICT (content_hash, version) DO NOTHING` is the chunk-level idempotency guard.
+The conflict target is scoped to `(content_hash, version)` so that identical content shared
+between versions (e.g. a file unchanged from 1.0-GA to 1.1) is stored once **per version** —
+each version has a complete and independent set of chunks in the DB.
 
-This ensures stale chunks never accumulate when a document is updated.
+This ensures:
+- Stale chunks never accumulate when a document is updated
+- No version is silently incomplete due to cross-version content deduplication
 
 ---
 
@@ -249,26 +255,44 @@ atlas:
 
 ```bash
 # Copy .env.example to .env and fill in your values
-# .env is loaded automatically via dotenv-java at startup — no export needed
 cp .env.example .env
 # edit .env: set GITHUB_TOKEN, OPENAI_API_KEY, DB_URL, DB_USERNAME, DB_PASSWORD
 
 # Run ingestion
-mvn exec:java -pl atlas-ingestion
+OPENAI_KEY=$(grep OPENAI_API_KEY .env | cut -d= -f2) && \
+  mvn exec:java -pl atlas-ingestion -Dspring.ai.openai.api-key="$OPENAI_KEY"
 ```
 
-Expected console output:
+> **Note:** The `-Dspring.ai.openai.api-key` flag is required because Spring AI validates
+> the key during autoconfiguration before `.env` values are available in the Spring context.
+
+Expected console output (first run):
 
 ```
-[INFO] Starting ingestion — version: 0.8, branch: 0.8.x
-[INFO] Fetched 45 files from GitHub
-[INFO] Chunking complete — 512 chunks produced
-[INFO] Embedding batch 1/6 — chunks 1-100
-[INFO] Embedding batch 2/6 — chunks 101-200
+INFO  IngestionService : === Ingesting version: 1.0-GA (branch: 1.0.x) ===
+INFO  IngestionService : Fetched 29 files for version 1.0-GA
+INFO  EmbeddingService : Embedding 7 chunks in 1 batch(es) of up to 100
+INFO  IngestionService :   ✓ advisors.adoc → 7 chunks produced, 7 inserted
+INFO  IngestionService :   ✓ chatclient.adoc → 12 chunks produced, 12 inserted
 ...
-[INFO] Inserted 498 chunks, skipped 14 (already existed)
-[INFO] Ingestion complete — version: 0.8 — duration: 38s — status: SUCCESS
+INFO  IngestionService : Version 1.0-GA done — files=29, produced=167, inserted=167, skipped=0, 12437ms
 
-[INFO] Starting ingestion — version: 1.0-GA, branch: 1.0.x
+INFO  IngestionService : === Ingesting version: 1.1 (branch: 1.1.x) ===
 ...
+INFO  IngestionService : Version 1.1 done — files=33, produced=192, inserted=192, skipped=0, 17267ms
 ```
+
+Expected console output (re-run — unchanged documents):
+
+```
+INFO  IngestionService : Version 1.0-GA done — files=29, produced=0, inserted=0, skipped=29, 1809ms
+```
+
+**Verified DB counts (first full run):**
+
+| Version | Branch | Files | Chunks |
+|---|---|---|---|
+| 1.0-GA | 1.0.x | 29 | 167 |
+| 1.1 | 1.1.x | 33 | 192 |
+| 2.0-M | main | 33 | 211 |
+| **Total** | | **95** | **570** |
