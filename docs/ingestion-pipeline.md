@@ -20,42 +20,42 @@ flowchart TD
     classDef decision fill:#8b5cf6,stroke:#7c3aed,color:#fff,font-weight:bold
     classDef record fill:#64748b,stroke:#475569,color:#fff,font-weight:bold
 
-    A([🚀 IngestionCli\nEntry Point]):::entry
-    B[/For each version\n1.0-GA · 1.1 · 2.0-M/]:::decision
+    A([IngestionCli - Entry Point]):::entry
+    B{For each version\n1.0-GA / 1.1 / 2.0-M}:::decision
 
-    subgraph FETCH ["📥 Step 1 — Fetch"]
+    subgraph FETCH [Step 1 - Fetch]
         C[GitHubDocsFetcher\nList include-paths via Contents API]:::fetch
         D[GitHubDocsFetcher\nFetch raw .adoc content via Raw URL]:::fetch
     end
 
-    subgraph EXTRACT ["🔤 Step 2 — Extract"]
-        E[AsciiDocAdapter\n.adoc → AsciidoctorJ → HTML]:::process
-        F[AsciiDocAdapter\nJsoup strips HTML → plain text\nImage alt text preserved inline]:::process
+    subgraph EXTRACT [Step 2 - Extract]
+        E[AsciiDocAdapter\n.adoc to AsciidoctorJ to HTML]:::process
+        F[AsciiDocAdapter\nJsoup strips HTML to plain text\nImage alt text preserved inline]:::process
     end
 
-    subgraph CHUNK ["✂️ Step 3 — Chunk"]
-        G[ChunkingService\njtokkit encodes full text → token IDs]:::process
-        H[ChunkingService\nSliding window — size 512, step 448\nDecode each window → chunk text]:::process
-        I[ChunkingService\nSHA-256 content_hash per chunk\nTag: source · version · section · url]:::process
+    subgraph CHUNK [Step 3 - Chunk]
+        G[ChunkingService\njtokkit encodes full text to token IDs]:::process
+        H[ChunkingService\nSliding window: size 512 step 448\nDecode each window to chunk text]:::process
+        I[ChunkingService\nSHA-256 content_hash per chunk\nTag: source version section url]:::process
     end
 
-    subgraph EMBED ["🧠 Step 4 — Embed"]
+    subgraph EMBED [Step 4 - Embed]
         J[EmbeddingService\nBatch 100 chunks per API call]:::embed
         K{Rate limit\nHTTP 429?}:::decision
         L[Exponential backoff\nRetry up to 3 times]:::embed
-        M[OpenAI text-embedding-3-small\nfloat 1536 per chunk]:::embed
+        M[OpenAI text-embedding-3-small\n1536 floats per chunk]:::embed
     end
 
-    subgraph STORE ["💾 Step 5 — Store"]
+    subgraph STORE [Step 5 - Store]
         N{document_hash\nchanged?}:::decision
-        NA[Skip file —\nall chunks unchanged]:::store
-        NB[DELETE old chunks\nfor url + version]:::store
-        NC[ChunkJdbcWriter\nINSERT chunks\nON CONFLICT (content_hash, version) DO NOTHING]:::store
+        NA[Skip file\nall chunks unchanged]:::store
+        NB[DELETE old chunks\nfor url and version]:::store
+        NC[ChunkJdbcWriter\nINSERT with ON CONFLICT\ncontent_hash+version DO NOTHING]:::store
     end
 
-    subgraph RECORD ["📊 Step 6 — Record"]
+    subgraph RECORD [Step 6 - Record]
         R[IngestionRunRepository\nWrite ingestion_runs row]:::record
-        S[Log: files fetched\nchunks produced · inserted · skipped\nduration · status]:::record
+        S[Log: files fetched\nchunks produced inserted skipped\nduration and status]:::record
     end
 
     A --> B
